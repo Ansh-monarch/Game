@@ -1,1 +1,23 @@
-
+{
+  "name": "real-time-chat-app",
+  "version": "1.0.0",
+  "description": "A real-time multiplayer chat application",
+  "main": "chat-server.js",
+  "scripts": {
+    "start": "node chat-server.js",
+    "dev": "nodemon chat-server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "socket.io": "^4.7.0",
+    "cors": "^2.8.5"
+  },
+  "keywords": [
+    "chat",
+    "real-time",
+    "socket.io",
+    "multiplayer"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
