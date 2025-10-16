@@ -3,476 +3,428 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Color Match Challenge</title>
+    <title>Real-Time Chat App</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         body {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            padding: 20px;
         }
-        
-        .container {
-            max-width: 800px;
+
+        .header {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
             width: 100%;
-            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .users-sidebar {
+            width: 250px;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 15px;
             padding: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
         }
-        
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-        }
-        
-        .game-info {
+
+        .chat-main {
+            flex: 1;
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
+            flex-direction: column;
             background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            overflow: hidden;
         }
-        
-        .game-area {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+
+        .messages-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
             gap: 15px;
-            margin-bottom: 20px;
         }
-        
-        .color-card {
-            aspect-ratio: 1;
-            border-radius: 10px;
+
+        .message {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.own {
+            align-self: flex-end;
+            background: #007bff;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.other {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.2);
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-sender {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+
+        .message-text {
+            word-wrap: break-word;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            opacity: 0.6;
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        .input-container {
+            display: flex;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.1);
+            gap: 10px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .send-button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            background: #007bff;
+            color: white;
             cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+        }
+
+        .send-button:hover {
+            background: #0056b3;
+        }
+
+        .send-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .user-list {
+            list-style: none;
+        }
+
+        .user-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.2rem;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
-        }
-        
-        .color-card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-        
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        button {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 50px;
-            background: linear-gradient(to right, #ff416c, #ff4b2b);
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            font-size: 1rem;
-        }
-        
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-        
-        button:active {
-            transform: translateY(1px);
-        }
-        
-        .players-list {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-        
-        .players-list h3 {
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        
-        #players {
-            display: flex;
-            flex-wrap: wrap;
             gap: 10px;
-            justify-content: center;
         }
-        
-        .player {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
+
+        .user-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4CAF50;
         }
-        
-        .current-player {
-            background: rgba(255, 215, 0, 0.3);
-            box-shadow: 0 0 10px gold;
+
+        .user-status.offline {
+            background: #f44336;
         }
-        
-        .message {
-            text-align: center;
-            margin: 15px 0;
+
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            background: rgba(76, 175, 80, 0.3);
+            border: 1px solid #4CAF50;
+        }
+
+        .typing-indicator {
+            font-style: italic;
+            opacity: 0.7;
             padding: 10px;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-        
-        .success {
-            background: rgba(0, 255, 0, 0.2);
-            color: lightgreen;
-        }
-        
-        .error {
-            background: rgba(255, 0, 0, 0.2);
-            color: lightcoral;
-        }
-        
-        .instructions {
-            margin-top: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
             font-size: 0.9rem;
-            line-height: 1.5;
         }
-        
-        @media (max-width: 600px) {
-            .game-area {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
+
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-box {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            color: #333;
+            width: 300px;
+        }
+
+        .username-input {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .username-input:focus {
+            border-color: #007bff;
+        }
+
+        .join-button {
+            width: 100%;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .join-button:hover {
+            background: #0056b3;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Color Match Challenge</h1>
-            <p>Match the target color as quickly as possible!</p>
-        </header>
-        
-        <div class="game-info">
-            <div>
-                <p>Target Color: <span id="target-color">#FFFFFF</span></p>
-                <p>Time: <span id="timer">0</span>s</p>
-            </div>
-            <div>
-                <p>Score: <span id="score">0</span></p>
-                <p>Players Online: <span id="player-count">1</span></p>
-            </div>
-        </div>
-        
-        <div class="message" id="message"></div>
-        
-        <div class="game-area" id="game-area">
-            <!-- Color cards will be generated here -->
-        </div>
-        
-        <div class="controls">
-            <button id="start-btn">Start Game</button>
-            <button id="reset-btn">Reset Game</button>
-        </div>
-        
-        <div class="players-list">
-            <h3>Players</h3>
-            <div id="players">
-                <!-- Player list will be populated here -->
-            </div>
-        </div>
-        
-        <div class="instructions">
-            <h3>How to Play</h3>
-            <p>1. Click "Start Game" to begin</p>
-            <p>2. Match the target color by clicking on the correct color card</p>
-            <p>3. The faster you match, the more points you get</p>
-            <p>4. Compete with other players online in real-time</p>
+    <!-- Login Overlay -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-box">
+            <h2>Join the Chat</h2>
+            <p>Enter your username to start chatting</p>
+            <input type="text" class="username-input" id="usernameInput" placeholder="Your username" maxlength="20">
+            <button class="join-button" id="joinButton">Join Chat</button>
         </div>
     </div>
 
+    <!-- Main Chat Interface -->
+    <div class="header">
+        <h1>💬 Real-Time Chat App</h1>
+        <p>Chat with everyone online in real-time</p>
+    </div>
+
+    <div class="connection-status" id="connectionStatus">
+        Connected as: <span id="currentUser">Unknown</span>
+    </div>
+
+    <div class="chat-container">
+        <div class="users-sidebar">
+            <h3>Online Users (<span id="userCount">0</span>)</h3>
+            <ul class="user-list" id="userList">
+                <!-- Users will be added here -->
+            </ul>
+        </div>
+
+        <div class="chat-main">
+            <div class="messages-container" id="messagesContainer">
+                <!-- Messages will be added here -->
+                <div class="message other">
+                    <div class="message-sender">System</div>
+                    <div class="message-text">Welcome to the chat! Start typing to begin.</div>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator"></div>
+
+            <div class="input-container">
+                <input type="text" class="message-input" id="messageInput" placeholder="Type your message..." disabled>
+                <button class="send-button" id="sendButton" disabled>Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.0/socket.io.min.js"></script>
     <script>
-        // Game variables
-        let gameActive = false;
-        let timer = 0;
-        let score = 0;
-        let timerInterval;
-        let targetColor = '';
-        let playerId = '';
-        let players = [];
-        
+        // Socket connection - UPDATE THIS URL to your backend
+        const socket = io('https://back1-7ysy.onrender.com');
+
         // DOM elements
-        const gameArea = document.getElementById('game-area');
-        const targetColorElement = document.getElementById('target-color');
-        const timerElement = document.getElementById('timer');
-        const scoreElement = document.getElementById('score');
-        const playerCountElement = document.getElementById('player-count');
-        const playersElement = document.getElementById('players');
-        const messageElement = document.getElementById('message');
-        const startBtn = document.getElementById('start-btn');
-        const resetBtn = document.getElementById('reset-btn');
-        
-        // Initialize the game
-        function init() {
-            // Generate player ID
-            playerId = 'player-' + Math.floor(Math.random() * 1000);
-            
-            // Initialize player list with current player
-            players = [{ id: playerId, name: 'You', score: 0, current: true }];
-            updatePlayersList();
-            playerCountElement.textContent = players.length;
-            
-            // Set up event listeners
-            startBtn.addEventListener('click', startGame);
-            resetBtn.addEventListener('click', resetGame);
-            
-            // Initialize game board (but don't start yet)
-            initializeGame();
-            
-            // Simulate other players joining (for demo purposes)
-            simulateOtherPlayers();
-        }
-        
-        // Generate random color in hex format
-        function generateRandomColor() {
-            return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
-        }
-        
-        // Initialize the game board
-        function initializeGame() {
-            gameArea.innerHTML = '';
-            targetColor = generateRandomColor();
-            targetColorElement.textContent = targetColor.toUpperCase();
-            targetColorElement.style.color = targetColor;
-            
-            // Create color cards
-            const colors = [targetColor];
-            while (colors.length < 9) {
-                const color = generateRandomColor();
-                if (!colors.includes(color)) {
-                    colors.push(color);
-                }
+        const loginOverlay = document.getElementById('loginOverlay');
+        const usernameInput = document.getElementById('usernameInput');
+        const joinButton = document.getElementById('joinButton');
+        const currentUserSpan = document.getElementById('currentUser');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const messagesContainer = document.getElementById('messagesContainer');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const userList = document.getElementById('userList');
+        const userCount = document.getElementById('userCount');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        let currentUser = '';
+        let typingTimer;
+
+        // Login functionality
+        joinButton.addEventListener('click', joinChat);
+        usernameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') joinChat();
+        });
+
+        function joinChat() {
+            const username = usernameInput.value.trim();
+            if (username.length < 2) {
+                alert('Please enter a username (at least 2 characters)');
+                return;
             }
             
-            // Shuffle colors
-            for (let i = colors.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [colors[i], colors[j]] = [colors[j], colors[i]];
-            }
+            currentUser = username;
+            currentUserSpan.textContent = username;
+            loginOverlay.style.display = 'none';
+            messageInput.disabled = false;
+            sendButton.disabled = false;
+            messageInput.focus();
             
-            // Create color cards
-            colors.forEach(color => {
-                const card = document.createElement('div');
-                card.className = 'color-card';
-                card.style.backgroundColor = color;
-                card.dataset.color = color;
-                
-                // Add text for better visibility on light colors
-                const rgb = hexToRgb(color);
-                const brightness = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
-                card.style.color = brightness > 128 ? 'black' : 'white';
-                card.textContent = color.toUpperCase();
-                
-                card.addEventListener('click', () => handleColorClick(color));
-                gameArea.appendChild(card);
-            });
+            // Notify server about new user
+            socket.emit('userJoined', username);
         }
-        
-        // Convert hex color to RGB
-        function hexToRgb(hex) {
-            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? {
-                r: parseInt(result[1], 16),
-                g: parseInt(result[2], 16),
-                b: parseInt(result[3], 16)
-            } : { r: 0, g: 0, b: 0 };
-        }
-        
-        // Handle color card click
-        function handleColorClick(color) {
-            if (!gameActive) return;
-            
-            if (color === targetColor) {
-                // Correct match
-                const timeBonus = Math.max(10 - timer, 1);
-                score += timeBonus * 10;
-                scoreElement.textContent = score;
-                
-                showMessage(`Correct! +${timeBonus * 10} points`, 'success');
-                
-                // Update player score
-                const currentPlayer = players.find(p => p.id === playerId);
-                if (currentPlayer) {
-                    currentPlayer.score = score;
-                    updatePlayersList();
-                }
-                
-                // Reset timer and generate new colors
-                clearInterval(timerInterval);
-                timer = 0;
-                timerElement.textContent = timer;
-                initializeGame();
-                startTimer();
-            } else {
-                // Wrong match
-                showMessage('Wrong color! Try again.', 'error');
-            }
-        }
-        
-        // Start the game timer
-        function startTimer() {
-            timerInterval = setInterval(() => {
-                timer++;
-                timerElement.textContent = timer;
+
+        // Socket event handlers
+        socket.on('connect', () => {
+            console.log('Connected to chat server');
+        });
+
+        socket.on('disconnect', () => {
+            connectionStatus.style.background = 'rgba(244, 67, 54, 0.3)';
+            connectionStatus.style.borderColor = '#f44336';
+        });
+
+        // Receive new message
+        socket.on('newMessage', (data) => {
+            addMessage(data.username, data.message, data.timestamp, data.userId === socket.id);
+        });
+
+        // Receive user list update
+        socket.on('userListUpdate', (users) => {
+            updateUserList(users);
+        });
+
+        // Receive typing indicator
+        socket.on('userTyping', (data) => {
+            showTypingIndicator(data.username);
+        });
+
+        socket.on('userStopTyping', () => {
+            hideTypingIndicator();
+        });
+
+        // Message sending
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // Typing indicators
+        messageInput.addEventListener('input', () => {
+            socket.emit('typing');
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                socket.emit('stopTyping');
             }, 1000);
-        }
-        
-        // Show message to user
-        function showMessage(text, type) {
-            messageElement.textContent = text;
-            messageElement.className = `message ${type}`;
-            
-            setTimeout(() => {
-                messageElement.textContent = '';
-                messageElement.className = 'message';
-            }, 3000);
-        }
-        
-        // Start game
-        function startGame() {
-            if (gameActive) return;
-            
-            gameActive = true;
-            score = 0;
-            timer = 0;
-            scoreElement.textContent = score;
-            timerElement.textContent = timer;
-            
-            initializeGame();
-            startTimer();
-            
-            showMessage('Game started! Match the target color.', 'success');
-        }
-        
-        // Reset game
-        function resetGame() {
-            gameActive = false;
-            clearInterval(timerInterval);
-            timer = 0;
-            score = 0;
-            timerElement.textContent = timer;
-            scoreElement.textContent = score;
-            
-            // Reset player score
-            const currentPlayer = players.find(p => p.id === playerId);
-            if (currentPlayer) {
-                currentPlayer.score = 0;
-                updatePlayersList();
+        });
+
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message && currentUser) {
+                socket.emit('sendMessage', {
+                    username: currentUser,
+                    message: message
+                });
+                messageInput.value = '';
+                socket.emit('stopTyping');
             }
-            
-            gameArea.innerHTML = '';
-            targetColorElement.textContent = '#FFFFFF';
-            targetColorElement.style.color = '#FFFFFF';
-            
-            showMessage('Game reset. Click "Start Game" to begin.', 'success');
         }
-        
-        // Update players list
-        function updatePlayersList() {
-            playersElement.innerHTML = '';
-            players.forEach(player => {
-                const playerElement = document.createElement('div');
-                playerElement.className = `player ${player.current ? 'current-player' : ''}`;
-                playerElement.textContent = `${player.name}: ${player.score}`;
-                playersElement.appendChild(playerElement);
+
+        function addMessage(username, message, timestamp, isOwn = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isOwn ? 'own' : 'other'}`;
+            
+            const time = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            messageDiv.innerHTML = `
+                ${!isOwn ? `<div class="message-sender">${username}</div>` : ''}
+                <div class="message-text">${message}</div>
+                <div class="message-time">${time}</div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function updateUserList(users) {
+            userList.innerHTML = '';
+            userCount.textContent = users.length;
+            
+            users.forEach(user => {
+                const userItem = document.createElement('li');
+                userItem.className = 'user-item';
+                userItem.innerHTML = `
+                    <div class="user-status"></div>
+                    <span>${user.username}</span>
+                    ${user.id === socket.id ? ' (You)' : ''}
+                `;
+                userList.appendChild(userItem);
             });
         }
-        
-        // Simulate other players joining (for demo purposes)
-        function simulateOtherPlayers() {
-            // Add initial players
-            setTimeout(() => {
-                if (players.length < 4) {
-                    const names = ['Alex', 'Sam', 'Jordan', 'Taylor', 'Casey', 'Riley'];
-                    const name = names[Math.floor(Math.random() * names.length)];
-                    players.push({ 
-                        id: 'player-' + Math.floor(Math.random() * 1000), 
-                        name, 
-                        score: Math.floor(Math.random() * 200), 
-                        current: false 
-                    });
-                    updatePlayersList();
-                    playerCountElement.textContent = players.length;
-                    showMessage(`${name} joined the game!`, 'success');
-                }
-            }, 3000);
-            
-            // Periodically update player scores and add/remove players
-            setInterval(() => {
-                if (Math.random() > 0.7 && players.length < 5) {
-                    // Add new player
-                    const names = ['Alex', 'Sam', 'Jordan', 'Taylor', 'Casey', 'Riley'];
-                    const name = names[Math.floor(Math.random() * names.length)];
-                    players.push({ 
-                        id: 'player-' + Math.floor(Math.random() * 1000), 
-                        name, 
-                        score: Math.floor(Math.random() * 300), 
-                        current: false 
-                    });
-                    updatePlayersList();
-                    playerCountElement.textContent = players.length;
-                    showMessage(`${name} joined the game!`, 'success');
-                } else if (Math.random() > 0.8 && players.length > 1) {
-                    // Remove a player (not the current player)
-                    const nonCurrentPlayers = players.filter(p => !p.current);
-                    if (nonCurrentPlayers.length > 0) {
-                        const playerToRemove = nonCurrentPlayers[Math.floor(Math.random() * nonCurrentPlayers.length)];
-                        players = players.filter(p => p.id !== playerToRemove.id);
-                        updatePlayersList();
-                        playerCountElement.textContent = players.length;
-                        showMessage(`${playerToRemove.name} left the game`, 'error');
-                    }
-                } else {
-                    // Update scores of other players
-                    players.forEach(player => {
-                        if (!player.current && Math.random() > 0.5) {
-                            player.score += Math.floor(Math.random() * 20);
-                        }
-                    });
-                    updatePlayersList();
-                }
-            }, 5000);
+
+        function showTypingIndicator(username) {
+            typingIndicator.textContent = `${username} is typing...`;
         }
-        
-        // Initialize the game when the page loads
-        document.addEventListener('DOMContentLoaded', init);
+
+        function hideTypingIndicator() {
+            typingIndicator.textContent = '';
+        }
     </script>
 </body>
 </html>
